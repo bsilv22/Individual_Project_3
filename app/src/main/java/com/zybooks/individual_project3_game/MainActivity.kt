@@ -1,5 +1,7 @@
 package com.zybooks.individual_project3_game
 
+
+import MazeGame
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Individual_Project3_GameTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    MazeGame()
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)

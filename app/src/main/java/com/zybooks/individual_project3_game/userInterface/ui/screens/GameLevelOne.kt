@@ -49,7 +49,8 @@ data class Coin(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MazeGame() {
+
+fun MazeGame(modifier: Modifier = Modifier) {
     var playerX by remember { mutableStateOf(50f) }
     var playerY by remember { mutableStateOf(250f) }
     var direction by remember { mutableStateOf("none") }
@@ -78,13 +79,13 @@ fun MazeGame() {
 
     val coins = remember {
         mutableStateListOf(
-            Coin(50f * scale, 120f * scale),      // Middle of starting platform
-            Coin(170f * scale, 100f * scale),     // Middle of first bridge
-            Coin(290f * scale, 140f * scale),     // Middle of second bridge
-            Coin(410f * scale, 120f * scale),     // Middle of third bridge
-            Coin(530f * scale, 160f * scale),     // Middle of fourth bridge
-            Coin(650f * scale, 140f * scale),     // Middle of fifth bridge
-            Coin(770f * scale, 180f * scale)      // Middle of final platform
+            Coin(50f * scale, 130f * scale),      // Center of starting platform (y: 120 + 20/2)
+            Coin(170f * scale, 110f * scale),     // Center of first bridge (y: 100 + 20/2)
+            Coin(290f * scale, 150f * scale),     // Center of second bridge (y: 140 + 20/2)
+            Coin(410f * scale, 130f * scale),     // Center of third bridge (y: 120 + 20/2)
+            Coin(530f * scale, 170f * scale),     // Center of fourth bridge (y: 160 + 20/2)
+            Coin(650f * scale, 150f * scale),     // Center of fifth bridge (y: 140 + 20/2)
+            Coin(770f * scale, 190f * scale)      // Center of final platform (y: 180 + 20/2)
         )
     }
     var score by remember { mutableStateOf(0) }
@@ -157,20 +158,27 @@ fun MazeGame() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp)  // Ensure no padding interferes with the split
+            .padding(0.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.25f)  // Changed from 0.2f to 0.25f for 1/4 of the screen
-                .padding(4.dp)  // Reduced padding to prevent overflow
+                .weight(0.25f)
+                .padding(4.dp)
         ) {
-            repeat(4) { index ->
+            // Left half containing the direction boxes
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(end = 4.dp)
+            ) {
+                // Up box
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .padding(8.dp)  // Reduced padding from 10.dp
+                        .padding(8.dp)
                         .border(1.dp, Color.Black)
                         .dragAndDropTarget(
                             shouldStartDragAndDrop = { event ->
@@ -179,14 +187,8 @@ fun MazeGame() {
                             target = remember {
                                 object : DragAndDropTarget {
                                     override fun onDrop(event: DragAndDropEvent): Boolean {
-                                        dragBoxIndex = index
-                                        direction = when(index) {
-                                            0 -> "up"
-                                            1 -> "down"
-                                            2 -> "left"
-                                            3 -> "right"
-                                            else -> "none"
-                                        }
+                                        dragBoxIndex = 0
+                                        direction = "up"
                                         return true
                                     }
                                 }
@@ -195,20 +197,14 @@ fun MazeGame() {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = when(index) {
-                            0 -> "Up"
-                            1 -> "Down"
-                            2 -> "Left"
-                            3 -> "Right"
-                            else -> ""
-                        },
+                        text = "Up",
                         color = Color.Gray,
                         fontSize = 10.sp,
                         modifier = Modifier.align(Alignment.TopCenter)
                     )
 
                     this@Row.AnimatedVisibility(
-                        visible = index == dragBoxIndex,
+                        visible = dragBoxIndex == 0,
                         enter = scaleIn() + fadeIn(),
                         exit = scaleOut() + fadeOut()
                     ) {
@@ -235,7 +231,134 @@ fun MazeGame() {
                         )
                     }
                 }
+
+                // Down box
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(8.dp)
+                        .border(1.dp, Color.Black)
+                        .dragAndDropTarget(
+                            shouldStartDragAndDrop = { event ->
+                                event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                            },
+                            target = remember {
+                                object : DragAndDropTarget {
+                                    override fun onDrop(event: DragAndDropEvent): Boolean {
+                                        dragBoxIndex = 1
+                                        direction = "down"
+                                        return true
+                                    }
+                                }
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Down",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+
+                    this@Row.AnimatedVisibility(
+                        visible = dragBoxIndex == 1,
+                        enter = scaleIn() + fadeIn(),
+                        exit = scaleOut() + fadeOut()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowForward,
+                            contentDescription = "Arrow",
+                            tint = Color.Red,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .dragAndDropSource {
+                                    detectTapGestures(
+                                        onLongPress = { offset ->
+                                            startTransfer(
+                                                transferData = DragAndDropTransferData(
+                                                    clipData = ClipData.newPlainText(
+                                                        "text",
+                                                        ""
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+                        )
+                    }
+                }
+
+                // Right box
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(8.dp)
+                        .border(1.dp, Color.Black)
+                        .dragAndDropTarget(
+                            shouldStartDragAndDrop = { event ->
+                                event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                            },
+                            target = remember {
+                                object : DragAndDropTarget {
+                                    override fun onDrop(event: DragAndDropEvent): Boolean {
+                                        dragBoxIndex = 2
+                                        direction = "right"
+                                        return true
+                                    }
+                                }
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Right",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
+
+                    this@Row.AnimatedVisibility(
+                        visible = dragBoxIndex == 2,
+                        enter = scaleIn() + fadeIn(),
+                        exit = scaleOut() + fadeOut()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowForward,
+                            contentDescription = "Arrow",
+                            tint = Color.Red,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .dragAndDropSource {
+                                    detectTapGestures(
+                                        onLongPress = { offset ->
+                                            startTransfer(
+                                                transferData = DragAndDropTransferData(
+                                                    clipData = ClipData.newPlainText(
+                                                        "text",
+                                                        ""
+                                                    )
+                                                )
+                                            )
+                                        }
+                                    )
+                                }
+
+
+                        )
+                    }
+                }
             }
+
+            // Empty space for right half
+            Spacer(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+            )
         }
 
         Box(
@@ -273,7 +396,10 @@ fun MazeGame() {
                 drawCircle(
                     color = Color(0xFF666666),
                     radius = 30f,  // Reduced player size
-                    center = Offset(100f, -100f)
+                    center = Offset(
+                        x = (20f) * scale,  // Move in from left edge by radius
+                        y = (130f) * scale  // Platform y (120) + half platform height (20/2) for vertical center
+                    )
                 )
             }
         }

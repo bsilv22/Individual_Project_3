@@ -28,6 +28,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import kotlinx.coroutines.delay
@@ -57,7 +58,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
     var dragBoxIndex by remember { mutableStateOf(0) }
     var canvasWidth by remember { mutableStateOf(0f) }
 
-    val scale = 4f
+    val scale =6f
 
     val platforms = remember {
         mutableStateListOf(
@@ -208,27 +209,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         enter = scaleIn() + fadeIn(),
                         exit = scaleOut() + fadeOut()
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowForward,
-                            contentDescription = "Arrow",
-                            tint = Color.Red,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .dragAndDropSource {
-                                    detectTapGestures(
-                                        onLongPress = { offset ->
-                                            startTransfer(
-                                                transferData = DragAndDropTransferData(
-                                                    clipData = ClipData.newPlainText(
-                                                        "text",
-                                                        ""
-                                                    )
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                        )
+
                     }
                 }
 
@@ -267,27 +248,8 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         enter = scaleIn() + fadeIn(),
                         exit = scaleOut() + fadeOut()
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowForward,
-                            contentDescription = "Arrow",
-                            tint = Color.Red,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .dragAndDropSource {
-                                    detectTapGestures(
-                                        onLongPress = { offset ->
-                                            startTransfer(
-                                                transferData = DragAndDropTransferData(
-                                                    clipData = ClipData.newPlainText(
-                                                        "text",
-                                                        ""
-                                                    )
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                        )
+
+
                     }
                 }
 
@@ -321,46 +283,42 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         modifier = Modifier.align(Alignment.TopCenter)
                     )
 
-                    this@Row.AnimatedVisibility(
-                        visible = dragBoxIndex == 2,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowForward,
-                            contentDescription = "Arrow",
-                            tint = Color.Red,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .dragAndDropSource {
-                                    detectTapGestures(
-                                        onLongPress = { offset ->
-                                            startTransfer(
-                                                transferData = DragAndDropTransferData(
-                                                    clipData = ClipData.newPlainText(
-                                                        "text",
-                                                        ""
-                                                    )
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
 
-
-                        )
-                    }
                 }
             }
 
             // Empty space for right half
-            Spacer(
+            // Replace the Spacer with this Box
+            Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .weight(1f)
+                    .weight(1f),
+                contentAlignment = Alignment.Center
             )
-        }
-
+                 {
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = "Star",
+                        tint = Color.Red,
+                        modifier = Modifier
+                            .size(150.dp)  // Added explicit size for better visibility
+                            .dragAndDropSource {
+                                detectTapGestures(
+                                    onLongPress = { offset ->
+                                        startTransfer(
+                                            transferData = DragAndDropTransferData(
+                                                clipData = ClipData.newPlainText(
+                                                    "text",
+                                                    ""
+                                                )
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                    )
+                }
+            }
         Box(
             modifier = Modifier
                 .fillMaxWidth()

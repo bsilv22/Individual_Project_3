@@ -28,11 +28,17 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import kotlinx.coroutines.delay
 import kotlin.math.abs
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.layout.ContentScale
+import com.zybooks.individual_project3_game.R
+import androidx.compose.foundation.Image
 
 
 data class Platform(
@@ -213,6 +219,8 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
 
+
+                // Down box
                 // Down box
                 Box(
                     modifier = Modifier
@@ -233,23 +241,38 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                     }
                                 }
                             }
-                        ),
-                    contentAlignment = Alignment.Center
+                        )
                 ) {
-                    Text(
-                        text = "Down",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-
-                    this@Row.AnimatedVisibility(
-                        visible = dragBoxIndex == 1,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut()
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text(
+                            text = "Down",
+                            color = Color.Gray,
+                            fontSize = 10.sp
+                        )
+                        Canvas(modifier = Modifier.size(24.dp)) {
+                            val width = size.width
+                            val height = size.height
 
-
+                            // Draw arrow
+                            drawPath(
+                                path = androidx.compose.ui.graphics.Path().apply {
+                                    // Start at top center
+                                    moveTo(width / 2, 0f)
+                                    // Draw line to bottom right
+                                    lineTo(width, height / 2)
+                                    // Draw line to bottom left
+                                    lineTo(width / 2, height)
+                                    // Draw line to top left
+                                    lineTo(0f, height / 2)
+                                    // Close the path
+                                    close()
+                                },
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
 
@@ -323,8 +346,16 @@ fun MazeGame(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.60f)
-                .background(Color.White)
         ) {
+            // Add the background image
+            Image(
+                painter = painterResource(id = R.drawable.grass_03),
+                contentDescription = "Background",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Add your canvas on top
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
@@ -360,6 +391,4 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     )
                 )
             }
-        }
-    }
-}
+        }}}

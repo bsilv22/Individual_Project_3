@@ -167,164 +167,160 @@ fun MazeGame(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(0.dp)
     ) {
-        Row(
+        // Top row with winter background
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.25f)
-                .padding(4.dp)
         ) {
-            // Left half containing the direction boxes
+            // Winter background image
+            Image(
+                painter = painterResource(id = R.drawable.winter_background_top),
+                contentDescription = "Winter Background",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Content row on top of background
             Row(
                 modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(end = 4.dp)
+                    .fillMaxSize()
+                    .padding(4.dp)
             ) {
-                // Up box
-                Box(
+                // Left half containing the direction boxes
+                Row(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxHeight()
-                        .padding(8.dp)
-                        .border(1.dp, Color.Black)
-                        .dragAndDropTarget(
-                            shouldStartDragAndDrop = { event ->
-                                event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                            },
-                            target = remember {
-                                object : DragAndDropTarget {
-                                    override fun onDrop(event: DragAndDropEvent): Boolean {
-                                        dragBoxIndex = 0
-                                        direction = "up"
-                                        return true
+                        .weight(1f)
+                        .padding(end = 4.dp)
+                ) {
+                    // Up box
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(8.dp)
+                            .border(1.dp, Color.Black)
+                            .dragAndDropTarget(
+                                shouldStartDragAndDrop = { event ->
+                                    event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                                },
+                                target = remember {
+                                    object : DragAndDropTarget {
+                                        override fun onDrop(event: DragAndDropEvent): Boolean {
+                                            dragBoxIndex = 0
+                                            direction = "up"
+                                            return true
+                                        }
                                     }
                                 }
-                            }
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Up",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-
-                    this@Row.AnimatedVisibility(
-                        visible = dragBoxIndex == 0,
-                        enter = scaleIn() + fadeIn(),
-                        exit = scaleOut() + fadeOut()
-                    ) {
-
-                    }
-                }
-
-
-                // Down box
-                // Down box
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(8.dp)
-                        .border(1.dp, Color.Black)
-                        .dragAndDropTarget(
-                            shouldStartDragAndDrop = { event ->
-                                event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                            },
-                            target = remember {
-                                object : DragAndDropTarget {
-                                    override fun onDrop(event: DragAndDropEvent): Boolean {
-                                        dragBoxIndex = 1
-                                        direction = "down"
-                                        return true
-                                    }
-                                }
-                            }
-                        )
-                ) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Down",
+                            text = "Up",
                             color = Color.Gray,
-                            fontSize = 10.sp
+                            fontSize = 10.sp,
+                            modifier = Modifier.align(Alignment.TopCenter)
                         )
-                        Canvas(modifier = Modifier.size(24.dp)) {
-                            val width = size.width
-                            val height = size.height
 
-                            // Draw arrow
-                            drawPath(
-                                path = androidx.compose.ui.graphics.Path().apply {
-                                    // Start at top center
-                                    moveTo(width / 2, 0f)
-                                    // Draw line to bottom right
-                                    lineTo(width, height / 2)
-                                    // Draw line to bottom left
-                                    lineTo(width / 2, height)
-                                    // Draw line to top left
-                                    lineTo(0f, height / 2)
-                                    // Close the path
-                                    close()
+
+                    }
+
+                    // Down box
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(8.dp)
+                            .border(1.dp, Color.Black)
+                            .dragAndDropTarget(
+                                shouldStartDragAndDrop = { event ->
+                                    event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
                                 },
-                                color = Color.Gray
+                                target = remember {
+                                    object : DragAndDropTarget {
+                                        override fun onDrop(event: DragAndDropEvent): Boolean {
+                                            dragBoxIndex = 1
+                                            direction = "down"
+                                            return true
+                                        }
+                                    }
+                                }
                             )
+                    ) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Down",
+                                color = Color.Gray,
+                                fontSize = 10.sp
+                            )
+                            Canvas(modifier = Modifier.size(24.dp)) {
+                                val width = size.width
+                                val height = size.height
+
+                                drawPath(
+                                    path = androidx.compose.ui.graphics.Path().apply {
+                                        moveTo(width / 2, 0f)
+                                        lineTo(width, height / 2)
+                                        lineTo(width / 2, height)
+                                        lineTo(0f, height / 2)
+                                        close()
+                                    },
+                                    color = Color.Gray
+                                )
+                            }
                         }
+                    }
+
+                    // Right box
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(8.dp)
+                            .border(1.dp, Color.Black)
+                            .dragAndDropTarget(
+                                shouldStartDragAndDrop = { event ->
+                                    event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
+                                },
+                                target = remember {
+                                    object : DragAndDropTarget {
+                                        override fun onDrop(event: DragAndDropEvent): Boolean {
+                                            dragBoxIndex = 2
+                                            direction = "right"
+                                            return true
+                                        }
+                                    }
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Right",
+                            color = Color.Gray,
+                            fontSize = 10.sp,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
 
-                // Right box
+                // Right half with draggable star
                 Box(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxHeight()
-                        .padding(8.dp)
-                        .border(1.dp, Color.Black)
-                        .dragAndDropTarget(
-                            shouldStartDragAndDrop = { event ->
-                                event.mimeTypes().contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                            },
-                            target = remember {
-                                object : DragAndDropTarget {
-                                    override fun onDrop(event: DragAndDropEvent): Boolean {
-                                        dragBoxIndex = 2
-                                        direction = "right"
-                                        return true
-                                    }
-                                }
-                            }
-                        ),
+                        .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Right",
-                        color = Color.Gray,
-                        fontSize = 10.sp,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
-
-
-                }
-            }
-
-            // Empty space for right half
-            // Replace the Spacer with this Box
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            )
-                 {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = "Star",
                         tint = Color.Red,
                         modifier = Modifier
-                            .size(150.dp)  // Added explicit size for better visibility
+                            .size(150.dp)
                             .dragAndDropSource {
                                 detectTapGestures(
                                     onLongPress = { offset ->
@@ -342,12 +338,15 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     )
                 }
             }
+        }
+
+        // Bottom game area (keeping original grass background)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.60f)
         ) {
-            // Add the background image
+            // Original grass background
             Image(
                 painter = painterResource(id = R.drawable.grass_03),
                 contentDescription = "Background",
@@ -355,11 +354,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Add your canvas on top
+            // Game canvas
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(0.dp)  // Ensure no padding interferes with the canvas
+                    .padding(0.dp)
             ) {
                 // Draw platforms
                 platforms.forEach { platform ->
@@ -375,7 +374,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     if (!coin.collected) {
                         drawCircle(
                             color = Color(0xFFFFD700),
-                            radius = 30f,  // Reduced coin size
+                            radius = 30f,
                             center = Offset(coin.x, coin.y)
                         )
                     }
@@ -384,11 +383,13 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 // Draw player
                 drawCircle(
                     color = Color(0xFF666666),
-                    radius = 30f,  // Reduced player size
+                    radius = 30f,
                     center = Offset(
-                        x = (20f) * scale,  // Move in from left edge by radius
-                        y = (130f) * scale  // Platform y (120) + half platform height (20/2) for vertical center
+                        x = (20f) * scale,
+                        y = (130f) * scale
                     )
                 )
             }
-        }}}
+        }
+    }
+}

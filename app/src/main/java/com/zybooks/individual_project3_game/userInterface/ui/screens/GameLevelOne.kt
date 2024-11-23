@@ -39,13 +39,22 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.layout.ContentScale
 import com.zybooks.individual_project3_game.R
 import androidx.compose.foundation.Image
-
-
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
+import androidx.core.content.res.ResourcesCompat
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.remember
+import android.graphics.BitmapFactory
 @Composable
 fun DirectionalArrow(
     direction: String,
     modifier: Modifier = Modifier
 ) {
+
     Canvas(modifier = modifier.size(40.dp)) {
         val width = size.width
         val height = size.height
@@ -136,6 +145,7 @@ data class Coin(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+
 fun MazeGame(modifier: Modifier = Modifier) {
     var playerX by remember { mutableStateOf(20f * 6f) }
     var playerY by remember { mutableStateOf(130f * 6f) }
@@ -144,33 +154,41 @@ fun MazeGame(modifier: Modifier = Modifier) {
     var canvasWidth by remember { mutableStateOf(0f) }
     val scale = 6f
 
+    val context = LocalContext.current
+    val coinBitmap = remember {
+        BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)
+    }
+
+
+
     val platforms = remember {
         mutableStateListOf(
-            Platform(0f * scale, 120f * scale, 100f * scale, 20f * scale),
-            Platform(100f * scale, 100f * scale, 20f * scale, 40f * scale),
-            Platform(120f * scale, 100f * scale, 100f * scale, 20f * scale),
-            Platform(220f * scale, 100f * scale, 20f * scale, 60f * scale),
-            Platform(240f * scale, 140f * scale, 100f * scale, 20f * scale),
-            Platform(340f * scale, 120f * scale, 20f * scale, 40f * scale),
-            Platform(360f * scale, 120f * scale, 100f * scale, 20f * scale),
-            Platform(460f * scale, 120f * scale, 20f * scale, 60f * scale),
-            Platform(480f * scale, 160f * scale, 100f * scale, 20f * scale),
-            Platform(580f * scale, 140f * scale, 20f * scale, 40f * scale),
-            Platform(600f * scale, 140f * scale, 100f * scale, 20f * scale),
-            Platform(700f * scale, 140f * scale, 20f * scale, 60f * scale),
-            Platform(720f * scale, 180f * scale, 100f * scale, 20f * scale),
+            // Moved all Y positions up by adjusting the values (reduced Y values)
+            Platform(0f * scale, 80f * scale, 100f * scale, 20f * scale),
+            Platform(100f * scale, 60f * scale, 20f * scale, 40f * scale),
+            Platform(120f * scale, 60f * scale, 100f * scale, 20f * scale),
+            Platform(220f * scale, 60f * scale, 20f * scale, 60f * scale),
+            Platform(240f * scale, 100f * scale, 100f * scale, 20f * scale),
+            Platform(340f * scale, 80f * scale, 20f * scale, 40f * scale),
+            Platform(360f * scale, 80f * scale, 100f * scale, 20f * scale),
+            Platform(460f * scale, 80f * scale, 20f * scale, 60f * scale),
+            Platform(480f * scale, 120f * scale, 100f * scale, 20f * scale),
+            Platform(580f * scale, 100f * scale, 20f * scale, 40f * scale),
+            Platform(600f * scale, 100f * scale, 100f * scale, 20f * scale),
+            Platform(700f * scale, 100f * scale, 20f * scale, 60f * scale),
+            Platform(720f * scale, 140f * scale, 100f * scale, 20f * scale),
         )
     }
 
     val coins = remember {
         mutableStateListOf(
-            Coin(50f * scale, 130f * scale),
-            Coin(170f * scale, 110f * scale),
-            Coin(290f * scale, 150f * scale),
-            Coin(410f * scale, 130f * scale),
-            Coin(530f * scale, 170f * scale),
-            Coin(650f * scale, 150f * scale),
-            Coin(770f * scale, 190f * scale)
+            Coin(50f * scale, 90f * scale),    // Adjusted Y positions
+            Coin(170f * scale, 70f * scale),
+            Coin(290f * scale, 110f * scale),
+            Coin(410f * scale, 90f * scale),
+            Coin(530f * scale, 130f * scale),
+            Coin(650f * scale, 110f * scale),
+            Coin(770f * scale, 150f * scale)
         )
     }
     var score by remember { mutableStateOf(0) }
@@ -189,7 +207,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(direction) {
-        when(direction) {
+        when (direction) {
             "up" -> {
                 repeat(50) {
                     delay(16)
@@ -199,6 +217,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
             }
+
             "down" -> {
                 repeat(50) {
                     delay(16)
@@ -208,6 +227,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
             }
+
             "right" -> {
                 repeat(50) {
                     delay(16)
@@ -399,6 +419,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
             }
         }
 
+
+        // Add this at the top of your @Composable function, before the Box
+
+
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -424,22 +449,28 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     )
                 }
 
+                val imageWidth = 60f
+                val imageHeight = 60f
+
+                // Updated coin drawing code
                 coins.forEach { coin ->
                     if (!coin.collected) {
-                        drawCircle(
-                            color = Color(0xFFFFD700),
-                            radius = 30f,
-                            center = Offset(coin.x, coin.y)
-                        )
+                        drawIntoCanvas { canvas ->
+                            canvas.nativeCanvas.drawBitmap(
+                                coinBitmap,
+                                coin.x - imageWidth / 2,
+                                coin.y - imageHeight / 2,
+                                null
+                            )
+                        }
                     }
                 }
 
+                // Draw the player (circle for representation)
                 drawCircle(
                     color = Color(0xFF666666),
                     radius = 30f,
                     center = Offset(playerX, playerY)
                 )
             }
-        }
-    }
-}
+        }}}

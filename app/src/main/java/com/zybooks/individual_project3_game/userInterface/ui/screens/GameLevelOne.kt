@@ -41,6 +41,86 @@ import com.zybooks.individual_project3_game.R
 import androidx.compose.foundation.Image
 
 
+@Composable
+fun DirectionalArrow(
+    direction: String,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier.size(40.dp)) {
+        val width = size.width
+        val height = size.height
+        val path = androidx.compose.ui.graphics.Path()
+
+        when (direction) {
+            "up" -> {
+                // Arrow shaft
+                path.moveTo(width * 0.5f, height * 0.8f)
+                path.lineTo(width * 0.5f, height * 0.3f)
+
+                // Arrow head with curves
+                path.moveTo(width * 0.2f, height * 0.5f)
+                path.quadraticBezierTo(
+                    width * 0.5f, height * 0.1f,
+                    width * 0.8f, height * 0.5f
+                )
+
+                drawPath(
+                    path = path,
+                    color = Color(0xFF4CAF50),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = 8f,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                    )
+                )
+            }
+            "down" -> {
+                // Arrow shaft
+                path.moveTo(width * 0.5f, height * 0.2f)
+                path.lineTo(width * 0.5f, height * 0.7f)
+
+                // Arrow head with curves
+                path.moveTo(width * 0.2f, height * 0.5f)
+                path.quadraticBezierTo(
+                    width * 0.5f, height * 0.9f,
+                    width * 0.8f, height * 0.5f
+                )
+
+                drawPath(
+                    path = path,
+                    color = Color(0xFFE91E63),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = 8f,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                    )
+                )
+            }
+            "right" -> {
+                // Arrow shaft
+                path.moveTo(width * 0.2f, height * 0.5f)
+                path.lineTo(width * 0.7f, height * 0.5f)
+
+                // Arrow head with curves
+                path.moveTo(width * 0.5f, height * 0.2f)
+                path.quadraticBezierTo(
+                    width * 0.9f, height * 0.5f,
+                    width * 0.5f, height * 0.8f
+                )
+
+                drawPath(
+                    path = path,
+                    color = Color(0xFF2196F3),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = 8f,
+                        cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        join = androidx.compose.ui.graphics.StrokeJoin.Round
+                    )
+                )
+            }
+        }
+    }
+}
 data class Platform(
     val x: Float,
     val y: Float,
@@ -56,7 +136,6 @@ data class Coin(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-
 fun MazeGame(modifier: Modifier = Modifier) {
     var playerX by remember { mutableStateOf(50f) }
     var playerY by remember { mutableStateOf(250f) }
@@ -64,35 +143,35 @@ fun MazeGame(modifier: Modifier = Modifier) {
     var dragBoxIndex by remember { mutableStateOf(0) }
     var canvasWidth by remember { mutableStateOf(0f) }
 
-    val scale =6f
+    val scale = 6f
 
     val platforms = remember {
         mutableStateListOf(
-            Platform(0f * scale, 120f * scale, 100f * scale, 20f * scale),        // Starting platform
-            Platform(100f * scale, 100f * scale, 20f * scale, 40f * scale),       // First vertical up
-            Platform(120f * scale, 100f * scale, 100f * scale, 20f * scale),      // First bridge
-            Platform(220f * scale, 100f * scale, 20f * scale, 60f * scale),       // Second vertical down
-            Platform(240f * scale, 140f * scale, 100f * scale, 20f * scale),      // Second bridge
-            Platform(340f * scale, 120f * scale, 20f * scale, 40f * scale),       // Third vertical up
-            Platform(360f * scale, 120f * scale, 100f * scale, 20f * scale),      // Third bridge
-            Platform(460f * scale, 120f * scale, 20f * scale, 60f * scale),       // Fourth vertical down
-            Platform(480f * scale, 160f * scale, 100f * scale, 20f * scale),      // Fourth bridge
-            Platform(580f * scale, 140f * scale, 20f * scale, 40f * scale),       // Fifth vertical up
-            Platform(600f * scale, 140f * scale, 100f * scale, 20f * scale),      // Fifth bridge
-            Platform(700f * scale, 140f * scale, 20f * scale, 60f * scale),       // Sixth vertical down
-            Platform(720f * scale, 180f * scale, 100f * scale, 20f * scale),      // Final platform
+            Platform(0f * scale, 120f * scale, 100f * scale, 20f * scale),
+            Platform(100f * scale, 100f * scale, 20f * scale, 40f * scale),
+            Platform(120f * scale, 100f * scale, 100f * scale, 20f * scale),
+            Platform(220f * scale, 100f * scale, 20f * scale, 60f * scale),
+            Platform(240f * scale, 140f * scale, 100f * scale, 20f * scale),
+            Platform(340f * scale, 120f * scale, 20f * scale, 40f * scale),
+            Platform(360f * scale, 120f * scale, 100f * scale, 20f * scale),
+            Platform(460f * scale, 120f * scale, 20f * scale, 60f * scale),
+            Platform(480f * scale, 160f * scale, 100f * scale, 20f * scale),
+            Platform(580f * scale, 140f * scale, 20f * scale, 40f * scale),
+            Platform(600f * scale, 140f * scale, 100f * scale, 20f * scale),
+            Platform(700f * scale, 140f * scale, 20f * scale, 60f * scale),
+            Platform(720f * scale, 180f * scale, 100f * scale, 20f * scale),
         )
     }
 
     val coins = remember {
         mutableStateListOf(
-            Coin(50f * scale, 130f * scale),      // Center of starting platform (y: 120 + 20/2)
-            Coin(170f * scale, 110f * scale),     // Center of first bridge (y: 100 + 20/2)
-            Coin(290f * scale, 150f * scale),     // Center of second bridge (y: 140 + 20/2)
-            Coin(410f * scale, 130f * scale),     // Center of third bridge (y: 120 + 20/2)
-            Coin(530f * scale, 170f * scale),     // Center of fourth bridge (y: 160 + 20/2)
-            Coin(650f * scale, 150f * scale),     // Center of fifth bridge (y: 140 + 20/2)
-            Coin(770f * scale, 190f * scale)      // Center of final platform (y: 180 + 20/2)
+            Coin(50f * scale, 130f * scale),
+            Coin(170f * scale, 110f * scale),
+            Coin(290f * scale, 150f * scale),
+            Coin(410f * scale, 130f * scale),
+            Coin(530f * scale, 170f * scale),
+            Coin(650f * scale, 150f * scale),
+            Coin(770f * scale, 190f * scale)
         )
     }
     var score by remember { mutableStateOf(0) }
@@ -115,7 +194,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
             "up" -> {
                 repeat(50) {
                     delay(16)
-                    val newY = playerY - 2f  // Reduced movement speed
+                    val newY = playerY - 2f
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY
                     }
@@ -124,7 +203,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
             "down" -> {
                 repeat(50) {
                     delay(16)
-                    val newY = playerY + 2f  // Reduced movement speed
+                    val newY = playerY + 2f
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY
                     }
@@ -133,7 +212,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
             "left" -> {
                 repeat(50) {
                     delay(16)
-                    val newX = playerX - 2f  // Reduced movement speed
+                    val newX = playerX - 2f
                     if (isOnPlatform(newX, playerY, platforms)) {
                         playerX = newX
                     }
@@ -142,7 +221,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
             "right" -> {
                 repeat(50) {
                     delay(16)
-                    val newX = playerX + 2f  // Reduced movement speed
+                    val newX = playerX + 2f
                     if (isOnPlatform(newX, playerY, platforms)) {
                         playerX = newX
                     }
@@ -153,7 +232,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
 
         coins.forEach { coin ->
             if (!coin.collected &&
-                abs(playerX - coin.x) < 15f &&  // Reduced collision radius
+                abs(playerX - coin.x) < 15f &&
                 abs(playerY - coin.y) < 15f
             ) {
                 coin.collected = true
@@ -217,14 +296,19 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Up",
-                            color = Color.Gray,
-                            fontSize = 10.sp,
-                            modifier = Modifier.align(Alignment.TopCenter)
-                        )
-
-
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Up",
+                                color = Color.Gray,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            DirectionalArrow(direction = "up")
+                        }
                     }
 
                     // Down box
@@ -247,32 +331,21 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                         }
                                     }
                                 }
-                            )
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = "Down",
                                 color = Color.Gray,
-                                fontSize = 10.sp
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(bottom = 4.dp)
                             )
-                            Canvas(modifier = Modifier.size(24.dp)) {
-                                val width = size.width
-                                val height = size.height
-
-                                drawPath(
-                                    path = androidx.compose.ui.graphics.Path().apply {
-                                        moveTo(width / 2, 0f)
-                                        lineTo(width, height / 2)
-                                        lineTo(width / 2, height)
-                                        lineTo(0f, height / 2)
-                                        close()
-                                    },
-                                    color = Color.Gray
-                                )
-                            }
+                            DirectionalArrow(direction = "down")
                         }
                     }
 
@@ -299,12 +372,19 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Right",
-                            color = Color.Gray,
-                            fontSize = 10.sp,
-                            modifier = Modifier.align(Alignment.TopCenter)
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Right",
+                                color = Color.Gray,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            DirectionalArrow(direction = "right")
+                        }
                     }
                 }
 
@@ -339,14 +419,12 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 }
             }
         }
-
         // Bottom game area (keeping original grass background)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.60f)
         ) {
-            // Original grass background
             Image(
                 painter = painterResource(id = R.drawable.grass_03),
                 contentDescription = "Background",

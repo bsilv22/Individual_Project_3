@@ -137,12 +137,11 @@ data class Coin(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MazeGame(modifier: Modifier = Modifier) {
-    var playerX by remember { mutableStateOf(50f) }
-    var playerY by remember { mutableStateOf(250f) }
+    var playerX by remember { mutableStateOf(20f * 6f) }
+    var playerY by remember { mutableStateOf(130f * 6f) }
     var direction by remember { mutableStateOf("none") }
     var dragBoxIndex by remember { mutableStateOf(0) }
     var canvasWidth by remember { mutableStateOf(0f) }
-
     val scale = 6f
 
     val platforms = remember {
@@ -209,15 +208,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
             }
-            "left" -> {
-                repeat(50) {
-                    delay(16)
-                    val newX = playerX - 2f
-                    if (isOnPlatform(newX, playerY, platforms)) {
-                        playerX = newX
-                    }
-                }
-            }
             "right" -> {
                 repeat(50) {
                     delay(16)
@@ -246,13 +236,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(0.dp)
     ) {
-        // Top row with winter background
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.25f)
         ) {
-            // Winter background image
             Image(
                 painter = painterResource(id = R.drawable.winter_background_top),
                 contentDescription = "Winter Background",
@@ -260,20 +248,17 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Content row on top of background
             Row(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(4.dp)
             ) {
-                // Left half containing the direction boxes
                 Row(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(1f)
                         .padding(end = 4.dp)
                 ) {
-                    // Up box
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -287,7 +272,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                 target = remember {
                                     object : DragAndDropTarget {
                                         override fun onDrop(event: DragAndDropEvent): Boolean {
-                                            dragBoxIndex = 0
                                             direction = "up"
                                             return true
                                         }
@@ -311,7 +295,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         }
                     }
 
-                    // Down box
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -325,7 +308,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                 target = remember {
                                     object : DragAndDropTarget {
                                         override fun onDrop(event: DragAndDropEvent): Boolean {
-                                            dragBoxIndex = 1
                                             direction = "down"
                                             return true
                                         }
@@ -349,7 +331,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         }
                     }
 
-                    // Right box
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -363,7 +344,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                 target = remember {
                                     object : DragAndDropTarget {
                                         override fun onDrop(event: DragAndDropEvent): Boolean {
-                                            dragBoxIndex = 2
                                             direction = "right"
                                             return true
                                         }
@@ -388,7 +368,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
 
-                // Right half with draggable star
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -419,7 +398,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 }
             }
         }
-        // Bottom game area (keeping original grass background)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -432,13 +411,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Game canvas
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(0.dp)
             ) {
-                // Draw platforms
                 platforms.forEach { platform ->
                     drawRect(
                         color = Color(0xFF5B9BD5),
@@ -447,7 +424,6 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     )
                 }
 
-                // Draw uncollected coins
                 coins.forEach { coin ->
                     if (!coin.collected) {
                         drawCircle(
@@ -458,14 +434,10 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
 
-                // Draw player
                 drawCircle(
                     color = Color(0xFF666666),
                     radius = 30f,
-                    center = Offset(
-                        x = (20f) * scale,
-                        y = (130f) * scale
-                    )
+                    center = Offset(playerX, playerY)
                 )
             }
         }

@@ -1,5 +1,7 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
+
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.ClipData
 import android.content.ClipDescription
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,6 +52,10 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
 import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.ui.text.font.FontWeight
+
+
 @Composable
 fun DirectionalArrow(
     direction: String,
@@ -147,17 +154,21 @@ data class Coin(
 @Composable
 
 fun MazeGame(modifier: Modifier = Modifier) {
-    var playerX by remember { mutableStateOf(20f * 6f) }
-    var playerY by remember { mutableStateOf(130f * 6f) }
+    var playerX by remember { mutableStateOf(30f *6f) }
+    var playerY by remember { mutableStateOf((80f + (20f / 2)) * 6f) }// 90f * scale
     var direction by remember { mutableStateOf("none") }
-    var dragBoxIndex by remember { mutableStateOf(0) }
-    var canvasWidth by remember { mutableStateOf(0f) }
+
+
+
     val scale = 6f
 
     val context = LocalContext.current
-    val coinBitmap = remember {
-        BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)
+    val coinBitmap = remember(context) {
+        BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)?.let { originalBitmap ->
+            Bitmap.createScaledBitmap(originalBitmap, 160, 160, true)
+        }
     }
+
 
 
 
@@ -191,64 +202,104 @@ fun MazeGame(modifier: Modifier = Modifier) {
             Coin(770f * scale, 150f * scale)
         )
     }
+
+
     var score by remember { mutableStateOf(0) }
 
     fun isOnPlatform(x: Float, y: Float, platforms: List<Platform>): Boolean {
-        platforms.forEach { platform ->
-            if (x >= platform.x &&
-                x <= platform.x + platform.width &&
-                y >= platform.y &&
-                y <= platform.y + platform.height
-            ) {
-                return true
-            }
+        val playerRadius = 50f  // Match circle radius
+
+        // First check for connected platforms (allow movement between them)
+        val connectedPlatforms = platforms.filter { platform ->
+            // Include current platform and adjacent platforms
+            x >= platform.x - playerRadius &&
+                    x <= platform.x + platform.width + playerRadius &&
+                    y >= platform.y - playerRadius &&
+                    y <= platform.y + platform.height + playerRadius
         }
-        return false
+
+        // If we have multiple connected platforms, treat them as one larger platform
+        if (connectedPlatforms.size > 1) {
+            val minX = connectedPlatforms.minOf { it.x }
+            val maxX = connectedPlatforms.maxOf { it.x + it.width }
+            val minY = connectedPlatforms.minOf { it.y }
+            val maxY = connectedPlatforms.maxOf { it.y + it.height }
+
+            return x >= minX + playerRadius &&
+                    x <= maxX - playerRadius &&
+                    y >= minY + playerRadius &&
+                    y <= maxY - playerRadius
+        }
+
+        // Otherwise check single platform bounds
+        return platforms.any { platform ->
+            x >= platform.x + playerRadius &&
+                    x <= platform.x + platform.width - playerRadius &&
+                    y >= platform.y + playerRadius &&
+                    y <= platform.y + platform.height - playerRadius
+        }
     }
+
+
 
     LaunchedEffect(direction) {
         when (direction) {
             "up" -> {
+                var velocity = 8f
                 repeat(50) {
-                    delay(16)
-                    val newY = playerY - 2f
+                    delay(90)
+                    val newY = playerY - velocity
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY
+                        coins.forEach { coin ->
+                            if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
+                                coin.collected = true
+                                score += 1
+                            }
+                        }
+                    } else {
+                        velocity *= 0.9f  // Slow down near edges
                     }
                 }
             }
-
             "down" -> {
+                var velocity = 8f
                 repeat(50) {
-                    delay(16)
-                    val newY = playerY + 2f
+                    delay(90)
+                    val newY = playerY + velocity
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY
+                        coins.forEach { coin ->
+                            if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
+                                coin.collected = true
+                                score += 1
+                            }
+                        }
+                    } else {
+                        velocity *= 0.9f  // Slow down near edges
                     }
                 }
             }
-
             "right" -> {
-                repeat(50) {
+                var velocity = 8f
+                repeat(90) {
                     delay(16)
-                    val newX = playerX + 2f
+                    val newX = playerX + velocity
                     if (isOnPlatform(newX, playerY, platforms)) {
                         playerX = newX
+                        coins.forEach { coin ->
+                            if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
+                                coin.collected = true
+                                score += 1
+                            }
+                        }
+                    } else {
+                        velocity *= 0.9f  // Slow down near edges
                     }
                 }
             }
         }
         direction = "none"
-
-        coins.forEach { coin ->
-            if (!coin.collected &&
-                abs(playerX - coin.x) < 15f &&
-                abs(playerY - coin.y) < 15f
-            ) {
-                coin.collected = true
-                score += 1
-            }
-        }
     }
 
     Column(
@@ -271,18 +322,21 @@ fun MazeGame(modifier: Modifier = Modifier) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(4.dp)
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly // Add this
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxHeight()
                         .weight(1f)
-                        .padding(end = 4.dp)
+                        .padding(end = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly // Add this
                 ) {
+                    // Up Button
                     Box(
                         modifier = Modifier
-                            .weight(1f)
                             .fillMaxHeight()
+                            .weight(1f)
                             .padding(8.dp)
                             .border(1.dp, Color.Black)
                             .dragAndDropTarget(
@@ -293,6 +347,9 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                     object : DragAndDropTarget {
                                         override fun onDrop(event: DragAndDropEvent): Boolean {
                                             direction = "up"
+
+                                            Log.d("MazeGame", "Direction changed to: $direction")
+
                                             return true
                                         }
                                     }
@@ -314,11 +371,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             DirectionalArrow(direction = "up")
                         }
                     }
-
+                    // Down Button
                     Box(
                         modifier = Modifier
-                            .weight(1f)
                             .fillMaxHeight()
+                            .weight(1f)
                             .padding(8.dp)
                             .border(1.dp, Color.Black)
                             .dragAndDropTarget(
@@ -351,10 +408,11 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         }
                     }
 
+                    // Right Button
                     Box(
                         modifier = Modifier
-                            .weight(1f)
                             .fillMaxHeight()
+                            .weight(1f)
                             .padding(8.dp)
                             .border(1.dp, Color.Black)
                             .dragAndDropTarget(
@@ -364,6 +422,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                 target = remember {
                                     object : DragAndDropTarget {
                                         override fun onDrop(event: DragAndDropEvent): Boolean {
+
                                             direction = "right"
                                             return true
                                         }
@@ -388,37 +447,54 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
 
-                Box(
+                // Star Box
+                Row(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = "Star",
-                        tint = Color.Red,
-                        modifier = Modifier
-                            .size(150.dp)
-                            .dragAndDropSource {
-                                detectTapGestures(
-                                    onLongPress = { offset ->
-                                        startTransfer(
-                                            transferData = DragAndDropTransferData(
-                                                clipData = ClipData.newPlainText(
-                                                    "text",
-                                                    ""
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Star",
+                            tint = Color.Red,
+                            modifier = Modifier
+                                .size(150.dp)
+                                .dragAndDropSource {
+                                    detectTapGestures(
+                                        onLongPress = { offset ->
+                                            startTransfer(
+                                                transferData = DragAndDropTransferData(
+                                                    clipData = ClipData.newPlainText(
+                                                        "text",
+                                                        ""
+                                                    )
                                                 )
                                             )
-                                        )
-                                    }
-                                )
-                            }
-                    )
-                }
-            }
-        }
+                                        }
+                                    )
+                                }
+                        )
+                    }
 
+                    Box(
+                        modifier = Modifier.padding(start = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Coins Collected: $score",
+                            color = Color.Yellow,
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }}
 
         // Add this at the top of your @Composable function, before the Box
 
@@ -449,12 +525,14 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     )
                 }
 
-                val imageWidth = 60f
-                val imageHeight = 60f
+
+                val imageWidth = 180f
+                val imageHeight = 180f
+
 
                 // Updated coin drawing code
                 coins.forEach { coin ->
-                    if (!coin.collected) {
+                    if (!coin.collected && coinBitmap != null) {
                         drawIntoCanvas { canvas ->
                             canvas.nativeCanvas.drawBitmap(
                                 coinBitmap,
@@ -466,11 +544,18 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
 
+
+
                 // Draw the player (circle for representation)
                 drawCircle(
                     color = Color(0xFF666666),
-                    radius = 30f,
-                    center = Offset(playerX, playerY)
+                    radius = 50f,
+                    center = Offset(playerX, playerY)  // Use the current player position
                 )
+
             }
-        }}}
+
+        }
+    }
+        }
+

@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalFoundationApi::class)
+package com.zybooks.individual_project3_game.userInterface.ui.screens
 
 
 
@@ -54,7 +55,8 @@ import androidx.compose.runtime.remember
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.ui.text.font.FontWeight
-
+import com.zybooks.individual_project3_game.levels.`Level1.kt`
+import com.zybooks.individual_project3_game.levels.Level1
 
 @Composable
 fun DirectionalArrow(
@@ -162,6 +164,9 @@ fun MazeGame(modifier: Modifier = Modifier) {
 
     val scale = 6f
 
+
+
+
     val context = LocalContext.current
     val coinBitmap = remember(context) {
         BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)?.let { originalBitmap ->
@@ -172,34 +177,23 @@ fun MazeGame(modifier: Modifier = Modifier) {
 
 
 
-    val platforms = remember {
-        mutableStateListOf(
-            // Moved all Y positions up by adjusting the values (reduced Y values)
-            Platform(0f * scale, 80f * scale, 100f * scale, 20f * scale),
-            Platform(100f * scale, 60f * scale, 20f * scale, 40f * scale),
-            Platform(120f * scale, 60f * scale, 100f * scale, 20f * scale),
-            Platform(220f * scale, 60f * scale, 20f * scale, 60f * scale),
-            Platform(240f * scale, 100f * scale, 100f * scale, 20f * scale),
-            Platform(340f * scale, 80f * scale, 20f * scale, 40f * scale),
-            Platform(360f * scale, 80f * scale, 100f * scale, 20f * scale),
-            Platform(460f * scale, 80f * scale, 20f * scale, 60f * scale),
-            Platform(480f * scale, 120f * scale, 100f * scale, 20f * scale),
-            Platform(580f * scale, 100f * scale, 20f * scale, 40f * scale),
-            Platform(600f * scale, 100f * scale, 100f * scale, 20f * scale),
-            Platform(700f * scale, 100f * scale, 20f * scale, 60f * scale),
-            Platform(720f * scale, 140f * scale, 100f * scale, 20f * scale),
+    var platforms by remember(currentLevel) {
+        mutableStateOf(
+            when(currentLevel) {
+                1 -> Level1.getPlatforms(scale)
+                2 -> Level1.getPlatforms(scale)
+                else -> Level1.getPlatforms(scale)
+            }
         )
     }
 
-    val coins = remember {
-        mutableStateListOf(
-            Coin(50f * scale, 90f * scale),    // Adjusted Y positions
-            Coin(170f * scale, 70f * scale),
-            Coin(290f * scale, 110f * scale),
-            Coin(410f * scale, 90f * scale),
-            Coin(530f * scale, 130f * scale),
-            Coin(650f * scale, 110f * scale),
-            Coin(770f * scale, 150f * scale)
+    var coins by remember(currentLevel) {
+        mutableStateOf(
+            when(currentLevel) {
+                1 -> Level1.getCoins(scale)
+                2 -> Level2.getCoins(scale)
+                else -> Level1.getCoins(scale)
+            }
         )
     }
 
@@ -246,8 +240,8 @@ fun MazeGame(modifier: Modifier = Modifier) {
         when (direction) {
             "up" -> {
                 var velocity = 8f
-                repeat(50) {
-                    delay(90)
+                repeat(90) {
+                    delay(16)
                     val newY = playerY - velocity
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY
@@ -264,8 +258,8 @@ fun MazeGame(modifier: Modifier = Modifier) {
             }
             "down" -> {
                 var velocity = 8f
-                repeat(50) {
-                    delay(90)
+                repeat(90) {
+                    delay(16)
                     val newY = playerY + velocity
                     if (isOnPlatform(playerX, newY, platforms)) {
                         playerY = newY

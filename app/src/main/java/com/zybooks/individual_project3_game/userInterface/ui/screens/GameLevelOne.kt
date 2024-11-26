@@ -54,9 +54,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
-import com.zybooks.individual_project3_game.levels.`Level1.kt`
 import com.zybooks.individual_project3_game.levels.Level1
+import com.zybooks.individual_project3_game.levels.Level2
+import java.time.format.TextStyle
 
 @Composable
 fun DirectionalArrow(
@@ -156,49 +159,65 @@ data class Coin(
 @Composable
 
 fun MazeGame(modifier: Modifier = Modifier) {
-    var playerX by remember { mutableStateOf(30f *6f) }
+    var playerX by remember { mutableStateOf(10f * 6f) }
     var playerY by remember { mutableStateOf((80f + (20f / 2)) * 6f) }// 90f * scale
     var direction by remember { mutableStateOf("none") }
 
-
+    var showLevelTransition by remember { mutableStateOf(false) }
 
     val scale = 6f
 
 
-
-
     val context = LocalContext.current
     val coinBitmap = remember(context) {
-        BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)?.let { originalBitmap ->
-            Bitmap.createScaledBitmap(originalBitmap, 160, 160, true)
-        }
+        BitmapFactory.decodeResource(context.resources, R.drawable.goldcoin4)
+            ?.let { originalBitmap ->
+                Bitmap.createScaledBitmap(originalBitmap, 160, 160, true)
+            }
     }
 
-
-
+    //next level code
+    var currentLevel by remember { mutableStateOf(1) }
 
     var platforms by remember(currentLevel) {
         mutableStateOf(
-            when(currentLevel) {
+            when (currentLevel) {
                 1 -> Level1.getPlatforms(scale)
-                2 -> Level1.getPlatforms(scale)
+                2 -> Level2.getPlatforms(scale)
                 else -> Level1.getPlatforms(scale)
             }
         )
     }
 
     var coins by remember(currentLevel) {
-        mutableStateOf(
-            when(currentLevel) {
-                1 -> Level1.getCoins(scale)
-                2 -> Level2.getCoins(scale)
-                else -> Level1.getCoins(scale)
-            }
-        )
+        val coinsList = when (currentLevel) {
+            1 -> Level1.getCoins(scale)
+            2 -> Level2.getCoins(scale)
+            else -> Level1.getCoins(scale)
+        }
+        mutableStateOf(coinsList)
     }
 
-
     var score by remember { mutableStateOf(0) }
+
+// Add debug logging and modify level change logic
+    LaunchedEffect(score) {
+        val coinsInLevel = coins.size
+        Log.d("GameDebug", "Score: $score, Coins in level: $coinsInLevel")
+
+        if (score > 0 && score == coinsInLevel) {  // Changed condition
+            Log.d("GameDebug", "Level complete! Moving to level ${currentLevel + 1}")
+            currentLevel++
+            score = 0  // Reset score for new level
+            playerX = 30f * scale
+            playerY = (80f + (20f / 2)) * scale
+            direction = "none"
+
+            // Reset coin collection status
+
+        }
+    }
+
 
     fun isOnPlatform(x: Float, y: Float, platforms: List<Platform>): Boolean {
         val playerRadius = 50f  // Match circle radius
@@ -234,6 +253,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
         }
     }
 
+    var totalScore by remember { mutableStateOf(0) }
 
 
     LaunchedEffect(direction) {
@@ -249,6 +269,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
                                 coin.collected = true
                                 score += 1
+                                totalScore += 1  // Add this line
                             }
                         }
                     } else {
@@ -256,6 +277,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
             }
+
             "down" -> {
                 var velocity = 8f
                 repeat(90) {
@@ -267,6 +289,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
                                 coin.collected = true
                                 score += 1
+                                totalScore += 1  // Add this line
                             }
                         }
                     } else {
@@ -274,6 +297,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                     }
                 }
             }
+
             "right" -> {
                 var velocity = 8f
                 repeat(90) {
@@ -285,6 +309,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                             if (!coin.collected && abs(playerX - coin.x) < 55f && abs(playerY - coin.y) < 55f) {
                                 coin.collected = true
                                 score += 1
+                                totalScore += 1  // Add this line
                             }
                         }
                     } else {
@@ -480,76 +505,109 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         modifier = Modifier.padding(start = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Coins Collected: $score",
-                            color = Color.Yellow,
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Bold
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .background(
+                                        color = Color.Black.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "TOTAL SCORE",
+                                    color = Color.Yellow,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "$totalScore",
+                                    color = Color.White,
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Black,
+                                    style = androidx.compose.ui.text.TextStyle(
+                                        shadow = Shadow(
+                                            color = Color.Black,
+                                            blurRadius = 8f,
+                                            offset = Offset(2f, 2f)
+                                        )
+                                    )
+                                )
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+    // Add this at the top of your @Composable function, before the Box
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(0.60f)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.grass_03),
+            contentDescription = "Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp)
+        ) {
+            platforms.forEach { platform ->
+                drawRect(
+                    color = Color(0xFF5B9BD5),
+                    topLeft = Offset(platform.x, platform.y),
+                    size = Size(platform.width, platform.height)
+                )
+            }
+
+
+            val imageWidth = 180f
+            val imageHeight = 180f
+
+
+            // Updated coin drawing code
+            coins.forEach { coin ->
+                if (!coin.collected && coinBitmap != null) {
+                    drawIntoCanvas { canvas ->
+                        canvas.nativeCanvas.drawBitmap(
+                            coinBitmap,
+                            coin.x - imageWidth / 2,
+                            coin.y - imageHeight / 2,
+                            null
                         )
                     }
                 }
-            }}
-
-        // Add this at the top of your @Composable function, before the Box
-
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.60f)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.grass_03),
-                contentDescription = "Background",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(0.dp)
-            ) {
-                platforms.forEach { platform ->
-                    drawRect(
-                        color = Color(0xFF5B9BD5),
-                        topLeft = Offset(platform.x, platform.y),
-                        size = Size(platform.width, platform.height)
-                    )
-                }
-
-
-                val imageWidth = 180f
-                val imageHeight = 180f
-
-
-                // Updated coin drawing code
-                coins.forEach { coin ->
-                    if (!coin.collected && coinBitmap != null) {
-                        drawIntoCanvas { canvas ->
-                            canvas.nativeCanvas.drawBitmap(
-                                coinBitmap,
-                                coin.x - imageWidth / 2,
-                                coin.y - imageHeight / 2,
-                                null
-                            )
-                        }
-                    }
-                }
-
-
-
-                // Draw the player (circle for representation)
-                drawCircle(
-                    color = Color(0xFF666666),
-                    radius = 50f,
-                    center = Offset(playerX, playerY)  // Use the current player position
-                )
-
             }
 
+
+            // Draw the player (circle for representation)
+            drawCircle(
+                color = Color(0xFF666666),
+                radius = 50f,
+                center = Offset(playerX, playerY)  // Use the current player position
+            )
+
         }
+
     }
-        }
+}
+}
+
 

@@ -1,6 +1,5 @@
 package com.zybooks.individual_project3_game
 
-import MazeGame
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import com.zybooks.individual_project3_game.ui.theme.Individual_Project3_GameTheme
+import com.zybooks.individual_project3_game.userInterface.ui.screens.MazeGame
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

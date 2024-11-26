@@ -1,6 +1,6 @@
 package com.zybooks.individual_project3_game.userInterface.ui
 
-class `components.kt` {
+
 
     // GameComponents.kt
     data class Platform(
@@ -48,4 +48,4 @@ class `components.kt` {
                     y >= platform.y + playerRadius &&
                     y <= platform.y + platform.height - playerRadius
         }
-    }}
+    }

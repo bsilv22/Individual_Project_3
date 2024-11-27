@@ -60,6 +60,13 @@ import androidx.compose.ui.text.font.FontWeight
 import com.zybooks.individual_project3_game.levels.Level1
 import com.zybooks.individual_project3_game.levels.Level2
 import java.time.format.TextStyle
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
 
 @Composable
 fun DirectionalArrow(
@@ -177,7 +184,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
     }
 
     //next level code
-    var currentLevel by remember { mutableStateOf(1) }
+    var currentLevel by remember { mutableStateOf(2) }
 
     var platforms by remember(currentLevel) {
         mutableStateOf(
@@ -478,15 +485,30 @@ fun MazeGame(modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxHeight(),
                         contentAlignment = Alignment.Center
                     ) {
+                        var isDragging by remember { mutableStateOf(false) }
+
+                        val scale by animateFloatAsState(
+                            targetValue = if (isDragging) 1.2f else 1f,
+                            label = "drag scale"
+                        )
+
                         Icon(
                             imageVector = Icons.Filled.Star,
                             contentDescription = "Star",
                             tint = Color.Red,
                             modifier = Modifier
                                 .size(150.dp)
+                                .scale(scale)
+                                .alpha(
+                                    animateFloatAsState(
+                                        targetValue = if (isDragging) 0.4f else 1f,
+                                        label = "fade animation"
+                                    ).value
+                                )
                                 .dragAndDropSource {
                                     detectTapGestures(
                                         onLongPress = { offset ->
+                                            isDragging = true
                                             startTransfer(
                                                 transferData = DragAndDropTransferData(
                                                     clipData = ClipData.newPlainText(
@@ -495,6 +517,7 @@ fun MazeGame(modifier: Modifier = Modifier) {
                                                     )
                                                 )
                                             )
+                                            isDragging = false
                                         }
                                     )
                                 }

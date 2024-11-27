@@ -8,18 +8,13 @@ class Level2 {
     companion object {
         fun getPlatforms(scale: Float) = mutableStateListOf(
             Platform(0f * scale, 80f * scale, 100f * scale, 20f * scale),
-            Platform(100f * scale, 80f * scale, 20f * scale, 60f * scale),
-            Platform(120f * scale, 120f * scale, 100f * scale, 20f * scale),
-            Platform(220f * scale, 100f * scale, 20f * scale, 40f * scale),
-            Platform(240f * scale, 100f * scale, 100f * scale, 20f * scale),
-            Platform(340f * scale, 80f * scale, 20f * scale, 40f * scale),
-            Platform(360f * scale, 80f * scale, 100f * scale, 20f * scale),
-            Platform(460f * scale, 60f * scale, 20f * scale, 40f * scale),
-            Platform(480f * scale, 60f * scale, 100f * scale, 20f * scale),
-            Platform(580f * scale, 60f * scale, 20f * scale, 80f * scale),
-            Platform(600f * scale, 120f * scale, 100f * scale, 20f * scale),
-            Platform(700f * scale, 100f * scale, 20f * scale, 40f * scale),
-            Platform(720f * scale, 100f * scale, 100f * scale, 20f * scale),
+            Platform(100f * scale, 60f * scale, 20f * scale, 60f * scale),
+            Platform(120f * scale, 60f * scale, 100f * scale, 20f * scale),
+            Platform(220f * scale, 60f * scale, 20f * scale, 80f * scale),
+            Platform(240f * scale, 120f * scale, 100f * scale, 20f * scale),
+            Platform(340f * scale, 90f * scale, 20f * scale, 50f * scale),
+            Platform(360f * scale, 90f * scale, 100f * scale, 20f * scale),
+
         )
 
         fun getCoins(scale: Float) = mutableStateListOf(

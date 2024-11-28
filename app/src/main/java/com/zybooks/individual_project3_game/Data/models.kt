@@ -1,4 +1,14 @@
-package com.zybooks.individual_project3_game.Data
+package com.yourappname.data.models
 
-class models {
-}
+data class Platform(
+    val x: Float,
+    val y: Float,
+    val width: Float = 50f,
+    val height: Float = 50f
+)
+
+data class Coin(
+    val x: Float,
+    val y: Float,
+    var collected: Boolean = false
+)
